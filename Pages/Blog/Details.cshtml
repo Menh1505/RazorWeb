@@ -1,0 +1,23 @@
+@page
+@model RazorWeb.Pages.Blog.DetailsModel
+
+@{
+    ViewData["Title"] = Model.Article.Title;
+}
+
+<h1>@Model.Article.Title</h1>
+@Html.DisplayFor(model => model.Article.Created)
+
+<div>
+    <h4>Nội dung</h4>
+    <hr />
+    <dl class="row">
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Article.Content)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-page="./Edit" asp-route-id="@Model.Article.ID">Chỉnh sửa</a> |
+    <a asp-page="./Index">Quay về danh sách</a>
+</div>
