@@ -1,10 +1,18 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using RazorWeb.Mail;
 using RazorWeb.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddOptions ();                                     
+var mailsettings = builder.Configuration.GetSection ("MailSettings"); 
+builder.Services.Configure<MailSettings> (mailsettings);              
+
+builder.Services.AddTransient<IEmailSender, SendMailService>(); 
+
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
        .AddEntityFrameworkStores<MyBlogContext>()
        .AddDefaultTokenProviders();
