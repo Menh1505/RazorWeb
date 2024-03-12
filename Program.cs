@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using RazorWeb.Mail;
+using RazorWeb.Migrations;
 using RazorWeb.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,15 +14,19 @@ builder.Services.Configure<MailSettings> (mailsettings);
 
 builder.Services.AddTransient<IEmailSender, SendMailService>(); 
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-       .AddEntityFrameworkStores<MyBlogContext>()
-       .AddDefaultTokenProviders();
+// builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+//        .AddEntityFrameworkStores<MyBlogContext>()
+//        .AddDefaultTokenProviders();
 
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<MyBlogContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
 });
+
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).
+    AddEntityFrameworkStores<MyBlogContext>().
+    AddDefaultTokenProviders();
 
 builder.Services.Configure<IdentityOptions> (options => {
     // Thiết lập về Password
@@ -34,7 +39,7 @@ builder.Services.Configure<IdentityOptions> (options => {
 
     // Cấu hình Lockout - khóa user
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes (5);
-    options.Lockout.MaxFailedAccessAttempts = 5; 
+    options.Lockout.MaxFailedAccessAttempts = 3; 
     options.Lockout.AllowedForNewUsers = true;
 
     // Cấu hình về User.
@@ -47,13 +52,18 @@ builder.Services.Configure<IdentityOptions> (options => {
     options.SignIn.RequireConfirmedPhoneNumber = false;     
 
 });
+
+builder.Services.ConfigureApplicationCookie(options => {
+    options.LoginPath = "/login";
+    options.LogoutPath = "/logout";
+    options.AccessDeniedPath = "/khongduoctruycap.html";
+});
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -68,3 +78,5 @@ app.UseAuthorization();
 app.MapRazorPages();
 
 app.Run();
+
+// dotnet aspnet-codegenerator identity -dc RazorWeb.Models.MyBlogContext
